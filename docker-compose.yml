@@ -1,0 +1,134 @@
+version: '3'
+
+services:
+  ### MySQL ################################################
+  mysql:
+    build:
+      context: ./mysql
+      args:
+        - MYSQL_VERSION=${MYSQL_VERSION}
+    environment:
+      - TZ=${TIMEZONE}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+        - ${SERVICE_DATA_PATH}/mysql:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT}:3306"
+
+  ### Redis ################################################
+  redis:
+    build:
+      context: ./redis
+      args:
+        - REDIS_VERSION=${REDIS_VERSION}
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${SERVICE_DATA_PATH}/redis:/data
+    ports:
+      - "${REDIS_PORT}:6379"
+
+  ### NGINX #########################################
+  nginx:
+    build:
+      context: ./nginx
+      args:
+        - CHANGE_SOURCE=${CHANGE_SOURCE}
+        - PHP_UPSTREAM_CONTAINER=${NGINX_PHP_UPSTREAM_CONTAINER}
+        - PHP_UPSTREAM_PORT=${NGINX_PHP_UPSTREAM_PORT}
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - ${PHP_APPS_PATH}:/var/www
+      - /Users/qing/Documents/work/golang/admin/web:/var/www/golang_admin_web
+      - ${SERVICE_LOG_PATH}/nginx:/var/log/nginx
+      - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
+      - ${NGINX_SSL_PATH}:/etc/nginx/ssl
+    ports:
+      - "10080-10099:80-99"
+      - "10443:443"
+    depends_on:
+      - php
+  ### PHP ##############################################
+  php:
+    build:
+      context: ./php
+      args:
+        - PHP_VERSION=${PHP_VERSION}
+        - CHANGE_SOURCE=${CHANGE_SOURCE}
+        - BASE_IMAGE_TAG_PREFIX=${PHP_BASE_IMAGE_TAG_PREFIX}
+        - INSTALL_BZ2=${PHP_INSTALL_BZ2}
+        - INSTALL_ENCHANT=${PHP_INSTALL_ENCHANT}
+        - INSTALL_GMP=${PHP_INSTALL_GMP}
+        - INSTALL_GNUPG=${PHP_INSTALL_GNUPG}
+        - INSTALL_XDEBUG=${PHP_INSTALL_XDEBUG}
+        - INSTALL_PCOV=${PHP_INSTALL_PCOV}
+        - INSTALL_PHPDBG=${PHP_INSTALL_PHPDBG}
+        - INSTALL_SSH2=${PHP_INSTALL_SSH2}
+        - INSTALL_SOAP=${PHP_INSTALL_SOAP}
+        - INSTALL_XSL=${PHP_INSTALL_XSL}
+        - INSTALL_SMB=${PHP_INSTALL_SMB}
+        - INSTALL_IMAP=${PHP_INSTALL_IMAP}
+        - INSTALL_MONGO=${PHP_INSTALL_MONGO}
+        - INSTALL_AMQP=${PHP_INSTALL_AMQP}
+        - INSTALL_CASSANDRA=${PHP_INSTALL_CASSANDRA}
+        - INSTALL_ZMQ=${PHP_INSTALL_ZMQ}
+        - INSTALL_GEARMAN=${PHP_INSTALL_GEARMAN}
+        - INSTALL_MSSQL=${PHP_INSTALL_MSSQL}
+        - INSTALL_BCMATH=${PHP_INSTALL_BCMATH}
+        - INSTALL_PHPREDIS=${PHP_INSTALL_PHPREDIS}
+        - INSTALL_MEMCACHED=${PHP_INSTALL_MEMCACHED}
+        - INSTALL_OPCACHE=${PHP_INSTALL_OPCACHE}
+        - INSTALL_EXIF=${PHP_INSTALL_EXIF}
+        - INSTALL_AEROSPIKE=${PHP_INSTALL_AEROSPIKE}
+        - INSTALL_OCI8=${PHP_INSTALL_OCI8}
+        - INSTALL_MYSQLI=${PHP_INSTALL_MYSQLI}
+        - INSTALL_PGSQL=${PHP_INSTALL_PGSQL}
+        - INSTALL_PG_CLIENT=${PHP_INSTALL_PG_CLIENT}
+        - INSTALL_POSTGIS=${PHP_INSTALL_POSTGIS}
+        - INSTALL_INTL=${PHP_INSTALL_INTL}
+        - INSTALL_GHOSTSCRIPT=${PHP_INSTALL_GHOSTSCRIPT}
+        - INSTALL_LDAP=${PHP_INSTALL_LDAP}
+        - INSTALL_SWOOLE=${PHP_INSTALL_SWOOLE}
+        - INSTALL_TAINT=${PHP_INSTALL_TAINT}
+        - INSTALL_IMAGE_OPTIMIZERS=${PHP_INSTALL_IMAGE_OPTIMIZERS}
+        - INSTALL_IMAGEMAGICK=${PHP_INSTALL_IMAGEMAGICK}
+        - INSTALL_CALENDAR=${PHP_INSTALL_CALENDAR}
+        - INSTALL_XLSWRITER=${PHP_INSTALL_XLSWRITER}
+        - INSTALL_FAKETIME=${PHP_INSTALL_FAKETIME}
+        - INSTALL_IONCUBE=${PHP_INSTALL_IONCUBE}
+        - INSTALL_APCU=${PHP_INSTALL_APCU}
+        - INSTALL_CACHETOOL=${PHP_INSTALL_CACHETOOL}
+        - INSTALL_YAML=${PHP_INSTALL_YAML}
+        - INSTALL_RDKAFKA=${PHP_INSTALL_RDKAFKA}
+        - INSTALL_GETTEXT=${PHP_INSTALL_GETTEXT}
+        - INSTALL_ADDITIONAL_LOCALES=${PHP_INSTALL_ADDITIONAL_LOCALES}
+        - INSTALL_MYSQL_CLIENT=${PHP_INSTALL_MYSQL_CLIENT}
+        - INSTALL_PING=${PHP_INSTALL_PING}
+        - INSTALL_SSHPASS=${PHP_INSTALL_SSHPASS}
+        - INSTALL_MAILPARSE=${PHP_INSTALL_MAILPARSE}
+        - INSTALL_PCNTL=${PHP_INSTALL_PCNTL}
+        - ADDITIONAL_LOCALES=${PHP_ADDITIONAL_LOCALES}
+        - INSTALL_FFMPEG=${PHP_FFMPEG}
+        - INSTALL_AUDIOWAVEFORM=${PHP_AUDIOWAVEFORM}
+        - INSTALL_WKHTMLTOPDF=${PHP_INSTALL_WKHTMLTOPDF}
+        - INSTALL_XHPROF=${PHP_INSTALL_XHPROF}
+        - INSTALL_XMLRPC=${PHP_INSTALL_XMLRPC}
+        - INSTALL_PHPDECIMAL=${PHP_INSTALL_PHPDECIMAL}
+        - INSTALL_ZOOKEEPER=${PHP_INSTALL_ZOOKEEPER}
+        - INSTALL_SSDB=${PHP_INSTALL_SSDB}
+        - INSTALL_TRADER=${PHP_INSTALL_TRADER}
+        - IMAGEMAGICK_VERSION=${PHP_IMAGEMAGICK_VERSION}
+        - LOCALE=${PHP_DEFAULT_LOCALE}
+        - INSTALL_DOCKER_CLIENT=${PHP_INSTALL_DOCKER_CLIENT}
+        - INSTALL_PYTHON=${PHP_INSTALL_PYTHON}
+        - INSTALL_SUPERVISOR=${PHP_INSTALL_SUPERVISOR}
+    environment:
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./php/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
+      - ${PHP_APPS_PATH}:/var/www
+      - ${SERVICE_LOG_PATH}/php:/var/log/php-fpm
+      - ./php/supervisord.d:/etc/supervisord.d
+    expose:
+      - "9000"
