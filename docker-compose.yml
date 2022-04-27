@@ -11,7 +11,7 @@ services:
       - TZ=${TIMEZONE}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
-        - ${SERVICE_DATA_PATH}/mysql:/var/lib/mysql
+        - ${SERVICE_DATAS_PATH}/mysql:/var/lib/mysql
     ports:
       - "${MYSQL_PORT}:3306"
 
@@ -24,7 +24,7 @@ services:
     environment:
       - TZ=${TIMEZONE}
     volumes:
-      - ${SERVICE_DATA_PATH}/redis:/data
+      - ${SERVICE_DATAS_PATH}/redis:/data
     ports:
       - "${REDIS_PORT}:6379"
 
@@ -41,7 +41,7 @@ services:
     volumes:
       - ${PHP_APPS_PATH}:/var/www
       - /Users/qing/Documents/work/golang/admin/web:/var/www/golang_admin_web
-      - ${SERVICE_LOG_PATH}/nginx:/var/log/nginx
+      - ${SERVICE_LOGS_PATH}/nginx:/var/log/nginx
       - ${NGINX_SITES_PATH}:/etc/nginx/sites-available
       - ${NGINX_SSL_PATH}:/etc/nginx/ssl
     ports:
@@ -56,6 +56,7 @@ services:
       args:
         - PHP_VERSION=${PHP_VERSION}
         - CHANGE_SOURCE=${CHANGE_SOURCE}
+        - COMPOSER_VERSION=${PHP_COMPOSER_VERSION}
         - BASE_IMAGE_TAG_PREFIX=${PHP_BASE_IMAGE_TAG_PREFIX}
         - INSTALL_BZ2=${PHP_INSTALL_BZ2}
         - INSTALL_ENCHANT=${PHP_INSTALL_ENCHANT}
@@ -128,7 +129,7 @@ services:
     volumes:
       - ./php/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
       - ${PHP_APPS_PATH}:/var/www
-      - ${SERVICE_LOG_PATH}/php:/var/log/php-fpm
+      - ${SERVICE_LOGS_PATH}/php:/var/log/php
       - ./php/supervisord.d:/etc/supervisord.d
     expose:
       - "9000"
